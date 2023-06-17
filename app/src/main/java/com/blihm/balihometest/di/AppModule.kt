@@ -8,7 +8,7 @@ import androidx.room.Room
 import com.blihm.balihometest.data.local.db.UsersDatabase
 import com.blihm.balihometest.data.local.model.UserEntity
 import com.blihm.balihometest.data.network.UsersRemoteMediator
-import com.blihm.balihometest.data.network.api.UsersApi
+import com.blihm.balihometest.data.network.api.GithubApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -34,12 +34,12 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideUsersApi(): UsersApi {
+    fun provideUsersApi(): GithubApi {
         return Retrofit.Builder()
             .baseUrl("https://api.github.com/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(UsersApi::class.java)
+            .create(GithubApi::class.java)
     }
 
     @OptIn(ExperimentalPagingApi::class)
@@ -47,13 +47,13 @@ object AppModule {
     @Singleton
     fun provideUsersPager(
         usersDatabase: UsersDatabase,
-        usersApi: UsersApi
+        githubApi: GithubApi
     ): Pager<Int, UserEntity> {
         return Pager(
-            config = PagingConfig(pageSize = 10),
+            config = PagingConfig(pageSize = 15, enablePlaceholders = false),
             remoteMediator = UsersRemoteMediator(
                 usersDao = usersDatabase.usersDao(),
-                usersApi = usersApi
+                githubApi = githubApi
             ),
             pagingSourceFactory = {
                 usersDatabase.usersDao().pagingSource()

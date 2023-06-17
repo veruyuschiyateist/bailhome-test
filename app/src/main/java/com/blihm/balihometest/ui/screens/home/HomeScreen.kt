@@ -32,9 +32,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
+import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
+import androidx.paging.compose.items
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.blihm.balihometest.R
@@ -45,9 +48,28 @@ import com.blihm.balihometest.ui.theme.BalihomeTestTheme
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-    val lazyPagingUsers = viewModel.usersFlow.collectAsLazyPagingItems()
+    val users = viewModel.usersFlow.collectAsLazyPagingItems()
 
-    HomeScreenWithList(users = lazyPagingUsers)
+    val context = LocalContext.current
+    LaunchedEffect(key1 = users.loadState) {
+        if (users.loadState.refresh is LoadState.Error) {
+            Toast.makeText(
+                context,
+                "Error: " + (users.loadState.refresh as LoadState.Error).error,
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        if (users.loadState.refresh is LoadState.Loading) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center)
+            )
+        } else {
+            HomeScreenWithList(users = users)
+        }
+    }
 }
 
 @Composable
@@ -64,7 +86,7 @@ fun HomeScreenWithList(
             ).show()
         }
     }
-    
+
     Box(modifier = Modifier.fillMaxSize()) {
         if (users.loadState.refresh is LoadState.Loading) {
             CircularProgressIndicator(
@@ -78,7 +100,8 @@ fun HomeScreenWithList(
             ) {
                 items(
                     count = users.itemCount,
-                    key = users.itemKey { it.id }
+                    key = users.itemKey { it.id },
+                    contentType = users.itemContentType { "UserPagingItems" }
                 ) { index ->
                     val user: UserEntity? = users[index]
                     user?.let {
@@ -96,12 +119,7 @@ fun HomeScreenWithList(
 }
 
 @Composable
-fun UsersList() {
-
-}
-
-@Composable
-fun UserItem(
+private fun UserItem(
     user: UserEntity,
     modifier: Modifier = Modifier
 ) {
@@ -142,21 +160,6 @@ fun UserItem(
         )
     }
 }
-
-@Composable
-@Preview(showBackground = true)
-fun UserItemPreview() {
-    BalihomeTestTheme {
-        UserItem(
-            user = UserEntity(
-                id = 1,
-                avatarUrl = "https://avatars.githubusercontent.com/u/2?v=4",
-                login = "defunkt"
-            )
-        )
-    }
-}
-
 
 @Composable
 @Preview(showBackground = true)

@@ -7,23 +7,24 @@ import androidx.paging.RemoteMediator
 import coil.network.HttpException
 import com.blihm.balihometest.data.local.db.UsersDao
 import com.blihm.balihometest.data.local.model.UserEntity
-import com.blihm.balihometest.data.network.api.UsersApi
+import com.blihm.balihometest.data.network.api.GithubApi
 import com.blihm.balihometest.data.toUserEntity
 import okio.IOException
 
 @OptIn(ExperimentalPagingApi::class)
 class UsersRemoteMediator(
     private val usersDao: UsersDao,
-    private val usersApi: UsersApi
+    private val githubApi: GithubApi
 ) : RemoteMediator<Int, UserEntity>() {
 
     override suspend fun load(
         loadType: LoadType,
         state: PagingState<Int, UserEntity>
     ): MediatorResult {
+
         return try {
             val loadKey = when (loadType) {
-                LoadType.REFRESH -> 1
+                LoadType.REFRESH -> 0
                 LoadType.PREPEND -> return MediatorResult.Success(
                     endOfPaginationReached = true
                 )
@@ -31,20 +32,22 @@ class UsersRemoteMediator(
                 LoadType.APPEND -> {
                     val lastItem = state.lastItemOrNull()
                     if (lastItem == null) {
-                        1
+                        return MediatorResult.Success(endOfPaginationReached = true)
                     } else {
-                        (lastItem.id / state.config.pageSize) + 1
+                        lastItem.id
                     }
                 }
             }
 
-            val users = usersApi.getUsers(
-                since = state.config.pageSize * loadKey,
+            val users = githubApi.getUsers(
+                since = loadKey,
                 perPage = state.config.pageSize
             )
 
             if (loadType == LoadType.REFRESH) {
                 usersDao.clearAndUpsert(users = users.map { it.toUserEntity() })
+            } else {
+                usersDao.upsertAll(users = users.map { it.toUserEntity() })
             }
 
             MediatorResult.Success(
@@ -56,4 +59,5 @@ class UsersRemoteMediator(
             MediatorResult.Error(e)
         }
     }
+
 }
