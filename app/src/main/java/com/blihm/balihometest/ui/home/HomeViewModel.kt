@@ -1,4 +1,4 @@
-package com.blihm.balihometest.ui.screens.home
+package com.blihm.balihometest.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

@@ -1,15 +1,14 @@
-package com.blihm.balihometest.data.network
+package com.blihm.balihometest.data
 
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
-import coil.network.HttpException
 import com.blihm.balihometest.data.local.db.UsersDao
 import com.blihm.balihometest.data.local.model.UserEntity
 import com.blihm.balihometest.data.network.api.GithubApi
-import com.blihm.balihometest.data.toUserEntity
 import okio.IOException
+import retrofit2.HttpException
 
 @OptIn(ExperimentalPagingApi::class)
 class UsersRemoteMediator(
@@ -34,7 +33,7 @@ class UsersRemoteMediator(
                     if (lastItem == null) {
                         return MediatorResult.Success(endOfPaginationReached = true)
                     } else {
-                        lastItem.id
+                        lastItem.userId
                     }
                 }
             }

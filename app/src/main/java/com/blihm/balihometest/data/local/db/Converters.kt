@@ -1,8 +1,10 @@
 package com.blihm.balihometest.data.local.db
 
+import androidx.room.ProvidedTypeConverter
 import androidx.room.TypeConverter
-import java.sql.Date
-
+import androidx.room.TypeConverters
+import java.util.Date
+@ProvidedTypeConverter
 class Converters {
 
     @TypeConverter

@@ -1,20 +1,19 @@
-package com.blihm.balihometest.ui.screens.home
+package com.blihm.balihometest.ui.home
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
@@ -29,24 +28,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
-import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
-import androidx.paging.compose.items
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.blihm.balihometest.R
 import com.blihm.balihometest.data.local.model.UserEntity
-import com.blihm.balihometest.ui.theme.BalihomeTestTheme
 
 @Composable
 fun HomeScreen(
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel(),
+    onSelect: (String) -> Unit
 ) {
     val users = viewModel.usersFlow.collectAsLazyPagingItems()
 
@@ -67,14 +63,17 @@ fun HomeScreen(
                 modifier = Modifier.align(Alignment.Center)
             )
         } else {
-            HomeScreenWithList(users = users)
+            HomeScreenWithList(users = users) { login ->
+                onSelect(login)
+            }
         }
     }
 }
 
 @Composable
 fun HomeScreenWithList(
-    users: LazyPagingItems<UserEntity>
+    users: LazyPagingItems<UserEntity>,
+    onSelect: (String) -> Unit
 ) {
     val context = LocalContext.current
     LaunchedEffect(key1 = users.loadState) {
@@ -100,12 +99,14 @@ fun HomeScreenWithList(
             ) {
                 items(
                     count = users.itemCount,
-                    key = users.itemKey { it.id },
+                    key = users.itemKey { it.userId },
                     contentType = users.itemContentType { "UserPagingItems" }
                 ) { index ->
                     val user: UserEntity? = users[index]
                     user?.let {
-                        UserItem(user = it)
+                        UserItem(user = it) { login ->
+                            onSelect(login)
+                        }
                     }
                 }
                 item {
@@ -121,11 +122,18 @@ fun HomeScreenWithList(
 @Composable
 private fun UserItem(
     user: UserEntity,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onSelect: (String) -> Unit
 ) {
-    Column {
+    Column(
+        modifier = modifier
+            .clickable {
+                Log.d("TAG", "UserItem: ${user.login}")
+                onSelect(user.login)
+            }
+    ) {
         Row(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .background(color = Color(0xFFFEF7FF))
                 .padding(vertical = 12.dp, horizontal = 16.dp),

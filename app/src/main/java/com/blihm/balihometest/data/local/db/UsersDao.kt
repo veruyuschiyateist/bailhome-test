@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Upsert
+import com.blihm.balihometest.data.local.model.OwnerWithRepositories
 import com.blihm.balihometest.data.local.model.UserEntity
 
 @Dao
@@ -18,6 +19,10 @@ interface UsersDao {
 
     @Query("DELETE FROM users")
     suspend fun clearAll()
+
+    @Transaction
+    @Query("SELECT * FROM users WHERE login LIKE :login")
+    fun repositoriesPagingSource(login: String): PagingSource<Int, OwnerWithRepositories>
 
     @Transaction
     suspend fun clearAndUpsert(users: List<UserEntity>) {
