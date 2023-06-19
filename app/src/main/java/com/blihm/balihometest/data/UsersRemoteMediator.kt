@@ -36,8 +36,8 @@ class UsersRemoteMediator(
                         lastItem.userId
                     }
                 }
-            }
 
+            }
             val users = githubApi.getUsers(
                 since = loadKey,
                 perPage = state.config.pageSize

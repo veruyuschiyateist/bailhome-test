@@ -16,32 +16,24 @@ class RepositoriesRemoteMediator(
     private val githubApi: GithubApi,
     private val userLogin: String,
 ) : RemoteMediator<Int, RepositoryEntity>() {
+
+    private var pageIndex = 0
+
     override suspend fun load(
         loadType: LoadType,
         state: PagingState<Int, RepositoryEntity>
     ): MediatorResult {
 
         return try {
-            val loadKey = when (loadType) {
-                LoadType.REFRESH -> 1
-                LoadType.PREPEND -> return MediatorResult.Success(
-                    endOfPaginationReached = true
-                )
 
-                LoadType.APPEND -> {
-                    val lastItem = state.lastItemOrNull()
-                    if (lastItem == null) {
-                        return MediatorResult.Success(endOfPaginationReached = true)
-                    } else {
-                        lastItem.repId
-                    }
-                }
-            }
+            pageIndex = getPageIndex(loadType) ?: return MediatorResult.Success(
+                endOfPaginationReached = true
+            )
 
             val repositories = githubApi.getUserRepositories(
                 login = userLogin,
                 perPage = state.config.pageSize,
-                page = loadKey
+                page = pageIndex
             )
 
             if (loadType == LoadType.REFRESH) {
@@ -60,5 +52,14 @@ class RepositoriesRemoteMediator(
         } catch (e: HttpException) {
             MediatorResult.Error(e)
         }
+    }
+
+    private fun getPageIndex(loadType: LoadType): Int? {
+        pageIndex = when (loadType) {
+            LoadType.REFRESH -> 0
+            LoadType.PREPEND -> return null
+            LoadType.APPEND -> ++pageIndex
+        }
+        return pageIndex
     }
 }
