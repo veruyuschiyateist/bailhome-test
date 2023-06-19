@@ -25,7 +25,7 @@ class PagingUserRepsRepository @Inject constructor(
     @OptIn(ExperimentalPagingApi::class)
     override fun getRepositories(login: String): Flow<PagingData<RepositoryEntity>> {
         return Pager(
-            config = PagingConfig(pageSize = 5, enablePlaceholders = false),
+            config = PagingConfig(pageSize = 50, enablePlaceholders = false),
             remoteMediator = RepositoriesRemoteMediator(
                 githubApi = githubApi,
                 repositoriesDao = repositoriesDao,
