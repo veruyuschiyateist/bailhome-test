@@ -7,17 +7,14 @@ import androidx.paging.RemoteMediator
 import com.blihm.balihometest.data.local.db.RepositoriesDao
 import com.blihm.balihometest.data.local.model.RepositoryEntity
 import com.blihm.balihometest.data.network.api.GithubApi
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import okio.IOException
 import retrofit2.HttpException
 
 @OptIn(ExperimentalPagingApi::class)
-class RepositoriesRemoteMediator @AssistedInject constructor(
+class RepositoriesRemoteMediator(
     private val repositoriesDao: RepositoriesDao,
     private val githubApi: GithubApi,
-    @Assisted private val userLogin: String,
+    private val userLogin: String,
 ) : RemoteMediator<Int, RepositoryEntity>() {
     override suspend fun load(
         loadType: LoadType,
@@ -48,7 +45,9 @@ class RepositoriesRemoteMediator @AssistedInject constructor(
             )
 
             if (loadType == LoadType.REFRESH) {
-                repositoriesDao.clearAndUpsert(repositories = repositories.map { it.toRepositoryEntity() })
+                repositoriesDao.clearAndUpsert(
+                    userLogin,
+                    repositories = repositories.map { it.toRepositoryEntity() })
             } else {
                 repositoriesDao.upsertAll(repositories = repositories.map { it.toRepositoryEntity() })
             }
@@ -61,10 +60,5 @@ class RepositoriesRemoteMediator @AssistedInject constructor(
         } catch (e: HttpException) {
             MediatorResult.Error(e)
         }
-    }
-
-    @AssistedFactory
-    interface Factory {
-        fun create(userLogin: String): RepositoriesRemoteMediator
     }
 }

@@ -11,6 +11,7 @@ import java.util.Date
 data class RepositoryEntity(
     @PrimaryKey(autoGenerate = false) var repId: Int,
     var ownerId: Int,
+    var ownerName: String,
     var name: String,
     var fullName: String,
     var private: Boolean,
@@ -26,5 +27,5 @@ data class RepositoryEntity(
     var forksCount: Int,
     var visibility: String
 ) {
-    constructor() : this(0, 0, "", "", false, "", false, Date(), Date(), "", "", "", 0, 0, 0, "")
+    constructor() : this(0, 0, "", "", "", false, "", false, Date(), Date(), "", "", "", 0, 0, 0, "")
 }

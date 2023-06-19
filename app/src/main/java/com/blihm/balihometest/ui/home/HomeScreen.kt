@@ -75,45 +75,26 @@ fun HomeScreenWithList(
     users: LazyPagingItems<UserEntity>,
     onSelect: (String) -> Unit
 ) {
-    val context = LocalContext.current
-    LaunchedEffect(key1 = users.loadState) {
-        if (users.loadState.refresh is LoadState.Error) {
-            Toast.makeText(
-                context,
-                "Error: " + (users.loadState.refresh as LoadState.Error).error,
-                Toast.LENGTH_SHORT
-            ).show()
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        items(
+            count = users.itemCount,
+            key = users.itemKey { it.userId },
+            contentType = users.itemContentType { "UserPagingItems" }
+        ) { index ->
+            val user: UserEntity? = users[index]
+            user?.let {
+                UserItem(user = it) { login ->
+                    onSelect(login)
+                }
+            }
         }
-    }
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        if (users.loadState.refresh is LoadState.Loading) {
-            CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center)
-            )
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                items(
-                    count = users.itemCount,
-                    key = users.itemKey { it.userId },
-                    contentType = users.itemContentType { "UserPagingItems" }
-                ) { index ->
-                    val user: UserEntity? = users[index]
-                    user?.let {
-                        UserItem(user = it) { login ->
-                            onSelect(login)
-                        }
-                    }
-                }
-                item {
-                    if (users.loadState.append is LoadState.Loading) {
-                        CircularProgressIndicator()
-                    }
-                }
+        item {
+            if (users.loadState.append is LoadState.Loading) {
+                CircularProgressIndicator()
             }
         }
     }

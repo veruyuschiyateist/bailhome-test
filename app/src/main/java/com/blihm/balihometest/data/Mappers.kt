@@ -27,6 +27,7 @@ fun UserRepositoryDto.toRepositoryEntity(): RepositoryEntity = RepositoryEntity(
     watchersCount = watchersCount,
     forksCount = forksCount,
     visibility = visibility,
-    ownerId = this.owner.id
+    ownerId = this.owner.id,
+    ownerName = this.owner.login
 )
 

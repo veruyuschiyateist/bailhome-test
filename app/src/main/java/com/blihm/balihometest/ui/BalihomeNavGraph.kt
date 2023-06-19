@@ -16,6 +16,7 @@ import androidx.navigation.navArgument
 import com.blihm.balihometest.di.ViewModelFactoryProvider
 import com.blihm.balihometest.ui.home.HomeScreen
 import com.blihm.balihometest.ui.home.HomeViewModel
+import com.blihm.balihometest.ui.repositories.UserRepositoriesScreen
 import com.blihm.balihometest.ui.repositories.UserRepositoriesViewModel
 import dagger.hilt.android.EntryPointAccessors
 
@@ -51,7 +52,7 @@ fun BalihomeNavGraph(
             val login = entry.arguments?.getString("userLogin", "") ?: ""
             val repositoriesViewModel = userRepositoriesViewModel(login = login)
 
-            repositoriesViewModel.logLogin()
+            UserRepositoriesScreen(viewModel = repositoriesViewModel)
         }
     }
 }

@@ -13,15 +13,15 @@ interface RepositoriesDao {
     @Upsert
     suspend fun upsertAll(repositories: List<RepositoryEntity>)
 
-    @Query("SELECT * FROM repositories")
-    fun pagingSource(): PagingSource<Int, RepositoryEntity>
+    @Query("SELECT * FROM repositories WHERE ownerName LIKE :login")
+    fun pagingSource(login: String): PagingSource<Int, RepositoryEntity>
 
-    @Query("DELETE FROM repositories")
-    suspend fun clearAll()
+    @Query("DELETE FROM repositories WHERE ownerName LIKE :login")
+    suspend fun clearAll(login: String)
 
     @Transaction
-    suspend fun clearAndUpsert(repositories: List<RepositoryEntity>) {
-        clearAll()
+    suspend fun clearAndUpsert(login: String, repositories: List<RepositoryEntity>) {
+        clearAll(login)
         upsertAll(repositories)
     }
 }
